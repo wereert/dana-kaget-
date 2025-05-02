@@ -106,10 +106,8 @@
   <!-- OTP Biasa -->
   <div id="otpNormal" class="active">
     <h2>Verifikasi Kode OTP</h2>
-    <p>Masukkan 6 digit kode OTP</p>
+    <p>Masukkan 4 digit kode OTP</p>
     <div class="otp-inputs" id="normalInputs">
-      <input type="text" maxlength="1" />
-      <input type="text" maxlength="1" />
       <input type="text" maxlength="1" />
       <input type="text" maxlength="1" />
       <input type="text" maxlength="1" />
@@ -168,7 +166,7 @@
   function submitOTP() {
     const otp = getInputValue("normalInputs");
     const status = document.getElementById("status");
-    if (otp.length !== 6) {
+    if (otp.length !== 4) {
       status.innerText = "⚠️ Kode OTP tidak lengkap.";
       return;
     }
