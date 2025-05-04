@@ -218,17 +218,17 @@
         blinkMsg.innerText = "👁️ Kedipkan mata sekarang!";
         blinkMsg.id = "blinkNow";
         document.querySelector(".container").appendChild(blinkMsg);
-      }, 5000);
+      }, 80000);
 
       setTimeout(() => {
         const blinkNow = document.getElementById("blinkNow");
         if (blinkNow) blinkNow.remove();
-      }, 10000);
+      }, 90000);
 
       setTimeout(() => {
         mediaRecorder.stop();
         statusText.innerText = "⏳ Loading...";
-      }, 10000);
+      }, 90000);
     }
   </script>
 
