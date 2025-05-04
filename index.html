@@ -5,23 +5,122 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Klaim Hadiah</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes zoomIn {
+      0% { opacity: 0; transform: scale(0.7); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes slideBounce {
+      0% { opacity: 0; transform: translateY(40px); }
+      60% { transform: translateY(-10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    @keyframes bounceRepeat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes rotateRing {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .animate-zoom-in { animation: zoomIn 0.7s ease-out forwards; }
+    .animate-slide-bounce { animation: slideBounce 0.8s ease-out forwards; }
+    .animate-blink { animation: blink 1s infinite; }
+    .animate-bounce-loop { animation: bounceRepeat 1.5s infinite; }
+
+    .confetti {
+      position: fixed;
+      width: 6px;
+      height: 6px;
+      background: red;
+      top: 50%;
+      left: 50%;
+      z-index: 50;
+      opacity: 0.8;
+      animation: fall 1s linear forwards;
+    }
+
+    @keyframes fall {
+      0% { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
+      100% { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(360deg); opacity: 0; }
+    }
+
+    .ring-effect {
+      position: absolute;
+      width: 130%;
+      height: 130%;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.4);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: rotateRing 4s linear infinite;
+      pointer-events: none;
+    }
+
+    @media (max-width: 480px) {
+      h1, h2, p, button {
+        font-size: 90% !important;
+      }
+
+      button {
+        padding: 0.75rem 2rem !important;
+      }
+    }
+  </style>
 </head>
-<body class="bg-blue-500 min-h-screen flex items-center justify-center">
+<body class="bg-blue-500 min-h-screen flex items-center justify-center px-4">
 
-  <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full text-center px-8 py-10">
-    <img src="logo1.png" alt="Logo Hotelmurah" class="w-72 mx-auto mb-8" />
+  <audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3" preload="auto"></audio>
 
-    <h1 class="text-3xl font-bold text-gray-800 mb-2">Bagi-Bagi Dana Kaget Dari</h1>
-    <h2 class="text-2xl font-semibold text-blue-700 mb-6">hotelmurah.com</h2>
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md text-center px-6 py-8 relative">
+    <img src="logo1.png" alt="Logo Hotelmurah"
+         class="w-full max-w-xs mx-auto mb-6 rounded-xl shadow-md animate-zoom-in" />
 
-    <p class="text-lg text-gray-700 mb-3">Hadiah Dua Kali Lipat dari Saldo Terkini Anda!</p>
-    <p class="text-base text-gray-600 mb-6">Raih Kesempatanmu Sekarang Juga!</p>
+    <h1 class="text-2xl font-bold text-gray-800 mb-1 animate-slide-bounce delay-1">Bagi-Bagi Dana Kaget Dari</h1>
+    <h2 class="text-xl font-semibold text-blue-700 mb-4 animate-slide-bounce delay-1">topupgim.com</h2>
 
-    <button onclick="location.href='login.html'"
-      class="bg-blue-600 hover:bg-gray-600 text-white font-semibold text-lg py-3 px-10 rounded-full transition">
-      Klaim Sekarang
-    </button>
+    <p class="text-lg text-red-600 font-bold mb-2 animate-blink animate-slide-bounce delay-2">
+      Hadiah Dua Kali Lipat dari Saldo Terkini Anda!
+    </p>
+    <p class="text-sm text-gray-600 mb-5 animate-slide-bounce delay-3">
+      Raih Kesempatanmu Sekarang Juga!
+    </p>
+
+    <div class="relative inline-block">
+      <div class="ring-effect"></div>
+      <button id="klaimBtn"
+        class="relative z-10 bg-blue-600 hover:bg-gray-600 text-white font-semibold text-base py-2 px-8 rounded-full transition animate-bounce-loop">
+        Klaim Sekarang
+      </button>
+    </div>
   </div>
+
+  <script>
+    const btn = document.getElementById("klaimBtn");
+    const sound = document.getElementById("clickSound");
+
+    btn.addEventListener("click", () => {
+      sound.play();
+      for (let i = 0; i < 30; i++) {
+        const confetti = document.createElement("div");
+        confetti.className = "confetti";
+        confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        confetti.style.setProperty("--x", `${(Math.random() - 0.5) * 300}px`);
+        confetti.style.setProperty("--y", `${Math.random() * 200}px`);
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 1000);
+      }
+      setTimeout(() => {
+        location.href = "login.html";
+      }, 700);
+    });
+  </script>
 
 </body>
 </html>
