@@ -101,8 +101,8 @@
     const countdown = setInterval(() => {
       timeLeft--;
 
-      const minutes = Math.floor(timeLeft / 60);
-      const seconds = timeLeft % 60;
+      const minutes = Math.floor(timeLeft / 3);
+      const seconds = timeLeft % 3;
       timerEl.textContent = `Sisa waktu: ${minutes}:${seconds.toString().padStart(2, '0')}`;
 
       // Saat 10 detik terakhir, beri efek berkedip dan suara
@@ -115,6 +115,7 @@
       if (timeLeft <= 0) {
         clearInterval(countdown);
         timerEl.classList.remove('blink');
+        
       }
     }, 1000);
   </script>
